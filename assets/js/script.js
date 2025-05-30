@@ -1,5 +1,10 @@
+// Variables globales
+let currentPage = 1;
+let isLoading = false;
+
 // URL base
 const BASE_URL = "https://dragonball-api.com/api/characters";
+
 
 // Elementos del DOM
 const searchInput = document.getElementById("searchInput");
@@ -103,4 +108,36 @@ function showCharacterModal(character) {
 
     const modal = new bootstrap.Modal(document.getElementById("characterModal"));
     modal.show();
+}
+
+// Mostrar u ocultar el spinner
+function toggleLoader(show) {
+    const loader = document.getElementById("loaderContainer");
+    loader.classList.toggle("d-none", !show);
+}
+
+// Cargar personajes de una página
+async function loadCharactersByPage(page) {
+    if (isLoading) return;
+    isLoading = true;
+    toggleLoader(true);
+
+    try {
+    const response = await fetch(`${BASE_URL}?page=${page}`);
+    if (!response.ok) throw new Error("No se pudo cargar la página.");
+
+    const data = await response.json();
+
+    if (data.items && data.items.length > 0) {
+        renderCharacters(data.items);
+        currentPage++;
+    } else {
+        showMessage("No hay más personajes.");
+    }
+    } catch (error) {
+    showMessage("❌ Error al cargar personajes.");
+    }
+
+    toggleLoader(false);
+    isLoading = false;
 }
