@@ -1,4 +1,4 @@
-// URL base de la API
+// URL base
 const BASE_URL = "https://dragonball-api.com/api/characters";
 
 // Elementos del DOM
@@ -7,77 +7,100 @@ const searchButton = document.getElementById("searchButton");
 const charactersContainer = document.getElementById("charactersContainer");
 const messageContainer = document.getElementById("messageContainer");
 
-// Evento al hacer clic en el botón de búsqueda
+// Evento para buscar
 searchButton.addEventListener("click", () => {
-  const name = searchInput.value.trim();
-  if (!name) {
-    showMessage("Por favor, escribe un nombre para buscar.");
+    const name = searchInput.value.trim();
+
+    if (!name) {
+    showMessage("⚠️ Escribí un nombre para buscar.");
     return;
-  }
-  fetchCharactersByName(name);
+    }
+
+    fetchCharactersByName(name);
 });
 
-// Mostrar mensajes de error o información
+// Mostrar mensajes
 function showMessage(message) {
-  messageContainer.textContent = message;
+    messageContainer.textContent = message;
 }
 
-// Limpiar resultados anteriores
+// Limpiar resultados
 function clearResults() {
-  charactersContainer.innerHTML = "";
-  messageContainer.textContent = "";
+    messageContainer.textContent = "";
+    charactersContainer.innerHTML = "";
 }
 
-// Función principal: buscar personajes por nombre
+// Buscar personaje por nombre
 async function fetchCharactersByName(name) {
-  clearResults();
-  try {
+    clearResults();
+
+    try {
     const response = await fetch(`${BASE_URL}?name=${encodeURIComponent(name)}`);
-    if (!response.ok) throw new Error("Error al consultar la API.");
-    
+
+    if (!response.ok) throw new Error("Error al consultar la API");
+
     const data = await response.json();
 
     if (!data.items || data.items.length === 0) {
-      showMessage("No se encontraron personajes con ese nombre.");
-      return;
+        showMessage("❌ No se encontraron personajes.");
+        return;
     }
 
     renderCharacters(data.items);
-  } catch (error) {
-    showMessage("Ocurrió un error: " + error.message);
-  }
+    } catch (error) {
+    showMessage("❌ Error: " + error.message);
+    }
 }
 
-// Renderizar las tarjetas de los personajes
+// Mostrar tarjetas
 function renderCharacters(characters) {
-  characters.forEach(character => {
-    // Creamos una columna de Bootstrap
+    characters.forEach(character => {
     const col = document.createElement("div");
     col.className = "col-md-4";
 
-    // Tarjeta
     const card = document.createElement("div");
     card.className = "card h-100 shadow";
 
-    // Imagen
     const img = document.createElement("img");
     img.src = character.image;
-    img.className = "card-img-top";
     img.alt = character.name;
+    img.className = "card-img-top";
 
-    // Cuerpo de la tarjeta
     const cardBody = document.createElement("div");
     cardBody.className = "card-body";
-
     cardBody.innerHTML = `
-      <h5 class="card-title">${character.name}</h5>
-      <p class="card-text"><strong>Raza:</strong> ${character.race}</p>
-      <p class="card-text"><strong>Género:</strong> ${character.gender}</p>
+        <h5 class="card-title">${character.name}</h5>
+        <p class="card-text"><strong>Raza:</strong> ${character.race}</p>
+        <p class="card-text"><strong>Género:</strong> ${character.gender}</p>
     `;
+
+    // Al hacer clic, mostrar modal
+    card.addEventListener("click", () => {
+        showCharacterModal(character);
+    });
 
     card.appendChild(img);
     card.appendChild(cardBody);
     col.appendChild(card);
     charactersContainer.appendChild(col);
-  });
+    });
+}
+
+// Mostrar modal
+function showCharacterModal(character) {
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+
+    modalTitle.textContent = character.name;
+
+    modalBody.innerHTML = `
+    <img src="${character.image}" class="img-fluid mb-3" alt="${character.name}">
+    <p><strong>Raza:</strong> ${character.race}</p>
+    <p><strong>Género:</strong> ${character.gender}</p>
+    <p><strong>Ki:</strong> ${character.ki}</p>
+    <p><strong>Descripción:</strong> ${character.description || "No disponible"}</p>
+    `;
+
+    const modal = new bootstrap.Modal(document.getElementById("characterModal"));
+    modal.show();
 }
