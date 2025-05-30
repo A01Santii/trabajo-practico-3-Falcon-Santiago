@@ -103,5 +103,4 @@ function showCharacterModal(character) {
 
     const modal = new bootstrap.Modal(document.getElementById("characterModal"));
     modal.show();
-    
 }
