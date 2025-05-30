@@ -1,4 +1,3 @@
-console.log("El script se cargó correctamente");
 
 // Variables globales
 let currentPage = 1;
